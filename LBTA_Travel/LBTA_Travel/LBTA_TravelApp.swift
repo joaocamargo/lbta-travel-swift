@@ -11,7 +11,7 @@ import SwiftUI
 struct LBTA_TravelApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DiscoverView()
         }
     }
 }
