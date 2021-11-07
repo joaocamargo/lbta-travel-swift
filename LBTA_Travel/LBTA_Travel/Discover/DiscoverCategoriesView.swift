@@ -9,8 +9,8 @@ import SwiftUI
 
 struct DiscoverCategoriesView: View {
     let categories: [Category] = [
-        .init(name: "Art", imageName: "paintpalette.fill"),
-        .init(name: "Sport", imageName: "sportscourt.fill"),
+        .init(name: "art", imageName: "paintpalette.fill"),
+        .init(name: "sports", imageName: "sportscourt.fill"),
         .init(name: "Live Events", imageName: "music.mic"),
         .init(name: "Food", imageName: "music.mic"),
         .init(name: "History", imageName: "music.mic"),
@@ -21,7 +21,7 @@ struct DiscoverCategoriesView: View {
         ScrollView(.horizontal,showsIndicators: false) {
             HStack(alignment: .top, spacing: 14){
                 ForEach(categories, id: \.self) { category in
-                    NavigationLink(destination: CategoryDetailsView(), label: {
+                    NavigationLink(destination: CategoryDetailsView(name: category.name), label: {
                         VStack(spacing: 8) {
                             Image(systemName: category.imageName)
                                 .font(.system(size: 20))

@@ -17,12 +17,26 @@ class CategoryDetailsViewModel: ObservableObject {
     @Published var places = [Place]()
     @Published var errorMessage =  ""
     
-    
-    init(){
+    init(name: String){
         
-        guard let url = URL(string: "https://travel.letsbuildthatapp.com/travel_discovery/category?name=art") else { return }
+        let urlstring = "https://travel.letsbuildthatapp.com/travel_discovery/category?name=\(name.lowercased())"
+                                                    .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         
+        guard let url = URL(string: urlstring ) else {
+            self.isLoading = false
+            return
+        }
+        
+        print(url)
         URLSession.shared.dataTask(with: url) { (data, resp, err) in
+            
+            if let statusCode = (resp as? HTTPURLResponse)?.statusCode, statusCode >= 400 {
+                self.isLoading = false
+                self.errorMessage = "Bad status: \(statusCode)"
+                return
+            }
+            
+            
             DispatchQueue.main.async {
                 guard let data = data else { return }
                 do {
@@ -42,7 +56,16 @@ class CategoryDetailsViewModel: ObservableObject {
 
 struct CategoryDetailsView: View {
     
-    @ObservedObject var vm = CategoryDetailsViewModel()
+      
+    private let name: String
+    @ObservedObject var vm: CategoryDetailsViewModel
+    
+    init(name: String) {
+        self.name = name
+        self.vm =  CategoryDetailsViewModel(name: name)
+    }
+    
+     
     
     var body: some View {
         ZStack {
@@ -55,7 +78,15 @@ struct CategoryDetailsView: View {
                     .cornerRadius(8)
             } else {
                 ZStack {
-                    Text(vm.errorMessage)
+                    
+                    if !vm.errorMessage.isEmpty {
+                        VStack(spacing: 8) {
+                            Image(systemName: "xmark.octagon.fill").font(.system(size: 64, weight: .semibold))
+                                .foregroundColor(.red)
+                            Text(vm.errorMessage)
+                        }
+                    }
+                    
                     ScrollView {
                         ForEach(vm.places, id: \.self) { place in
                             VStack(alignment: .leading, spacing: 0){
@@ -69,7 +100,7 @@ struct CategoryDetailsView: View {
                     }
                 }
             }
-        }.navigationBarTitle("category", displayMode: .inline)
+        }.navigationBarTitle(self.name, displayMode: .inline)
 
     }
 }
@@ -77,7 +108,7 @@ struct CategoryDetailsView: View {
 struct CategoryDetailsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            CategoryDetailsView()
+            CategoryDetailsView(name: "art")
         }
     }
 }
