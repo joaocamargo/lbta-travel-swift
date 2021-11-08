@@ -7,6 +7,16 @@
 
 import SwiftUI
 
+struct NavigationLazyView<T: View>: View {
+    let build: () -> T
+    init(_ build: @autoclosure @escaping () -> T) {
+        self.build = build
+    }
+    var body:  T {
+        build()
+    }
+}
+
 struct DiscoverCategoriesView: View {
     let categories: [Category] = [
         .init(name: "art", imageName: "paintpalette.fill"),
@@ -21,7 +31,7 @@ struct DiscoverCategoriesView: View {
         ScrollView(.horizontal,showsIndicators: false) {
             HStack(alignment: .top, spacing: 14){
                 ForEach(categories, id: \.self) { category in
-                    NavigationLink(destination: CategoryDetailsView(name: category.name), label: {
+                    NavigationLink(destination: NavigationLazyView(CategoryDetailsView(name: category.name)), label: {
                         VStack(spacing: 8) {
                             Image(systemName: category.imageName)
                                 .font(.system(size: 20))
